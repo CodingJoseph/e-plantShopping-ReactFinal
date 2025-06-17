@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import './ProductList.css';
+import './ProductList.css'
 import CartItem from './CartItem';
-import addItem from './CartSlice';
+import { addItem, removeItem, updateQuantity } from './CartSlice';
 function ProductList({ onHomeClick }) {
+    //Dispatch shorthand.
     const dispatch = useDispatch();
-    const cart = useSelector((state) => state.cart.items);
-
+    //State controls visibility of Cart page.
     const [showCart, setShowCart] = useState(false);
-    const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
-    const [addedToCart, setAddedToCart] = useState({}); // state management to track which products are added to cart
-    
+    //State controls visibility of About Us page.
+    const [showPlants, setShowPlants] = useState(false);
+    //State tracks which products are added to Cart.
+    const [addedToCart, setAddedToCart] = useState({});
+    //Acquires total number of items in Cart.
     const totalQuantity = useSelector(state =>
+        //Gets state from store, gets Cart from state, 
+        // then goes through each item and adds its quantity to sum, starting at 0.
         state.cart.items.reduce((sum, item) => sum + item.quantity, 0)
     );
-
-    const handleAddToCart = (product) => {
-        console.log(product, "product added to cart");
-        dispatch(addItem(product)); 
-        setAddedToCart((prevState) => ({
-            ...prevState,
-            [product.name]: true,
-        }));
-        console.log("addToCart handled");
-    };
-    // Must be displayed to show all products.
+    /** plantsArray is organized like so:
+     * Array of Objects with plant 'category' as KEY and Array of Objects 'plants' as VALUE
+     * plants IN plantsArray is organized like so:
+     * Array of Objects with plant 'name' as KEY and 'image, description, and cost' as VALUE
+    */
     const plantsArray = [
         {
             category: "Air Purifying Plants",
@@ -112,6 +110,18 @@ function ProductList({ onHomeClick }) {
             category: "Insect Repellent Plants",
             plants: [
                 {
+                    name: "Pothos",
+                    image: "https://cdn.pixabay.com/photo/2018/11/15/10/32/plants-3816945_1280.jpg",
+                    description: "Tolerates neglect and thrives in various light conditions.",
+                    cost: "$10"
+                },
+                {
+                    name: "ZZ Plant",
+                    image: "https://images.unsplash.com/photo-1632207691143-643e2a9a9361?q=80&w=464&auto=format&fit=crop",
+                    description: "Low maintenance, survives in low light, and adds elegance to any room.",
+                    cost: "$25"
+                },
+                {
                     name: "oregano",
                     image: "https://cdn.pixabay.com/photo/2015/05/30/21/20/oregano-790702_1280.jpg",
                     description: "The oregano plants contains compounds that can deter certain insects.",
@@ -152,6 +162,18 @@ function ProductList({ onHomeClick }) {
         {
             category: "Medicinal Plants",
             plants: [
+                {
+                    name: "Mint",
+                    image: "https://cdn.pixabay.com/photo/2016/01/07/18/16/mint-1126282_1280.jpg",
+                    description: "Fresh aroma, commonly used in teas and for its soothing effects.",
+                    cost: "$12"
+                },
+                {
+                    name: "Aloe Vera",
+                    image: "https://cdn.pixabay.com/photo/2018/04/02/07/42/leaf-3283175_1280.jpg",
+                    description: "Known for healing properties and air purification.",
+                    cost: "$14"
+                },
                 {
                     name: "Aloe Vera",
                     image: "https://cdn.pixabay.com/photo/2018/04/02/07/42/leaf-3283175_1280.jpg",
@@ -194,6 +216,18 @@ function ProductList({ onHomeClick }) {
             category: "Low Maintenance Plants",
             plants: [
                 {
+                    name: "Snake Plant",
+                    image: "https://cdn.pixabay.com/photo/2021/01/22/06/04/snake-plant-5939187_1280.jpg",
+                    description: "Produces oxygen at night and improves indoor air quality.",
+                    cost: "$15"
+                },
+                {
+                    name: "Lavender",
+                    image: "https://images.unsplash.com/photo-1611909023032-2d6b3134ecba?q=80&w=1074&auto=format&fit=crop",
+                    description: "Calming scent, great for aromatherapy and sleep support.",
+                    cost: "$20"
+                },
+                {
                     name: "ZZ Plant",
                     image: "https://images.unsplash.com/photo-1632207691143-643e2a9a9361?q=80&w=464&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                     description: "Thrives in low light and requires minimal watering.",
@@ -232,13 +266,14 @@ function ProductList({ onHomeClick }) {
             ]
         }
     ];
+    //Styles initialized.
     const styleObj = {
         backgroundColor: '#4CAF50',
         color: '#fff!important',
         padding: '15px',
         display: 'flex',
         justifyContent: 'space-between',
-        alignIems: 'center',
+        alignItems: 'center',
         fontSize: '20px',
     }
     const styleObjUl = {
@@ -252,23 +287,35 @@ function ProductList({ onHomeClick }) {
         fontSize: '30px',
         textDecoration: 'none',
     }
-
+    //BUTTON HANDLERS.
+    //Clicking Home, brings user to Get Started screen.
     const handleHomeClick = (e) => {
         e.preventDefault();
         onHomeClick();
     };
+    //Clicking Cart, shows Cart.
     const handleCartClick = (e) => {
         e.preventDefault();
         setShowCart(true); // Set showCart to true when cart icon is clicked
     };
+    //Clicking Plants Header, brings user to Plants display and hides Cart.
     const handlePlantsClick = (e) => {
         e.preventDefault();
         setShowPlants(true); // Set showAboutUs to true when "About Us" link is clicked
         setShowCart(false); // Hide the cart when navigating to About Us
     };
+    //Clicking Continue Shopping button in Cart, hides Cart.
     const handleContinueShopping = (e) => {
         e.preventDefault();
         setShowCart(false);
+    };
+    //Clicking Add to Cart button on any product, adds that product to cart
+    const handleAddToCart = (product) => {
+        dispatch(addItem(product)); //Dispatch action to add product to cart.
+        setAddedToCart((prevState) => ({
+            ...prevState, //Spreads previous state to keep existing Cart entries.
+            [product.name]: true, //Set product name as key and value as true to indicate added to cart.
+        }));
     };
     return (
         <div>
@@ -287,27 +334,30 @@ function ProductList({ onHomeClick }) {
                 </div>
                 <div style={styleObjUl}>
                     <div> <a href="#" onClick={(e) => handlePlantsClick(e)} style={styleA}>Plants</a></div>
-                    <div> <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}><h1 className='cart'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68"><rect width="156" height="156" fill="none"></rect><circle cx="80" cy="216" r="12"></circle><circle cx="184" cy="216" r="12"></circle><path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" id="mainIconPathAttribute"></path></svg></h1></a></div>
+                    <div > <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}><h1 className='cart'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68"><rect width="156" height="156" fill="none"></rect><circle cx="80" cy="216" r="12"></circle><circle cx="184" cy="216" r="12"></circle><path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" id="mainIconPathAttribute"></path></svg> <span className="cart_quantity_count">{totalQuantity}</span></h1></a></div>
                 </div>
             </div>
             {!showCart ? (
                 <div className="product-grid">
                     {plantsArray.map((category, index) => (
                         <div key={index}>
-                            <h1><div>{category.category}</div></h1>
+                            <h1 style={{ textAlign: 'center' }}>{category.category}</h1>
                             <div className="product-list">
                                 {category.plants.map((plant, plantIndex) => (
                                     <div className="product-card" key={plantIndex}>
-                                        <img className="product-image" src={plant.image} alt={plant.name}/>
                                         <div className="product-title">{plant.name}</div>
-                                        <div className="product-description">{plant.description}</div>
-                                        <div className="product-cost">{plant.cost}</div>
+                                        <img className="product-image" src={plant.image} alt={plant.name} />
+                                        <div className="product-price">{plant.cost}</div>
+                                        <p>{plant.description}</p>
+                                        {/*Similarly like the above plant.name show other details like description and cost*/}
                                         <button className="product-button" onClick={() => handleAddToCart(plant)}>Add to Cart</button>
                                     </div>
                                 ))}
                             </div>
                         </div>
+
                     ))}
+
 
                 </div>
             ) : (
